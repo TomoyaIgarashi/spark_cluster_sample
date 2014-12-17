@@ -30,8 +30,6 @@ def deploy():
 
     run("rm %(package_name)s.zip" % env)
 
-    run("ln -s ~/resources %(package_name)s/resources" % env)
-
     start()
 
 def restart():
