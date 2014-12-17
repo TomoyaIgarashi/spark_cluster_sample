@@ -43,7 +43,7 @@ object Application extends Controller {
     val path: Path = getClass.getProtectionDomain.getCodeSource.getLocation.getPath
     val jars = libs.flatMap(l => path.parent.map(p => (p / l).path))
     val conf = new SparkConf()
-      .setMaster("spark://Tomoya-Igarashis-MacBook-Air.local:7077")
+      .setMaster("spark://dimension-master:7077")
       .setAppName("SparkClusterSample")
       .set("spark.logConf", "true")
       .setJars(jars)
