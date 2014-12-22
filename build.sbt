@@ -6,7 +6,7 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
-  "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
+  "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3",
   "org.apache.spark" %% "spark-core" % "1.1.1",
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
   "com.typesafe.akka" %% "akka-remote" % "2.2.3"
