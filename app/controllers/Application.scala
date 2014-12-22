@@ -19,36 +19,34 @@ object Application extends Controller {
   private def addClassPathJars(sparkContext: SparkContext, classLoader: ClassLoader): Unit = {
     classLoader match {
       case urlClassLoader: URLClassLoader => {
-        urlClassLoader.getURLs.foreach(classPathUrl => {
-            if (classPathUrl.toExternalForm.endsWith(".jar")) {
-              Logger.debug(s"Added $classPathUrl to spark context $sparkContext")
-              sparkContext.addJar(classPathUrl.toExternalForm)
-            } else {
-              Logger.debug(s"Ignored $classPathUrl while adding to spark context $sparkContext")
-            }
-          }
-        )
+        urlClassLoader.getURLs.foreach { classPathUrl =>
+          if (classPathUrl.toExternalForm.endsWith(".jar"))
+            sparkContext.addJar(classPathUrl.toExternalForm)
+        }
       }
-      case _ => Logger.debug(s"Ignored class loader $classLoader as it does not subclasses URLClassLoader")
+      case _ =>
     }
     if (classLoader.getParent != null) {
       addClassPathJars(sparkContext, classLoader.getParent)
     }
   }
 
+  private def addJars(sparkContext: SparkContext, path: Path, libs: Array[String]): Unit = {
+    val jars = libs.flatMap(l => path.parent.map(p => (p / l).path))
+    jars.foreach(sparkContext.addJar(_))
+  }
+
   def index = Action {
     val libs = Array(
       "spark_cluster_sample_2.10-1.0-SNAPSHOT.jar"
     )
-    val path: Path = getClass.getProtectionDomain.getCodeSource.getLocation.getPath
-    val jars = libs.flatMap(l => path.parent.map(p => (p / l).path))
     val conf = new SparkConf()
       .setMaster("spark://Tomoya-Igarashis-MacBook-Air.local:7077")
       .setAppName("SparkClusterSample")
       .set("spark.logConf", "true")
-      .setJars(jars)
     val sc = new SparkContext(conf)
-    addClassPathJars(sc, this.getClass.getClassLoader)
+    addClassPathJars(sc, getClass.getClassLoader)
+    addJars(sc, getClass.getProtectionDomain.getCodeSource.getLocation.getPath, libs)
     val rdd = sc.parallelize(List(1, 2, 3, 4))
     val result = rdd.aggregate((0, 0))(
       (x, y) => (x._1 + y, x._2 + 1),
